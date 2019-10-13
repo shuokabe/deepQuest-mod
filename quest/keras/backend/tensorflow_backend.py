@@ -23,7 +23,7 @@ from .common import image_dim_ordering
 py_all = all
 py_sum = sum
 
-tf.set_random_seed(24)
+#tf.set_random_seed(24)
 print("TensorFlow backend Shu")
 
 # INTERNAL UTILS
