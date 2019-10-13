@@ -494,8 +494,6 @@ if __name__ == "__main__":
         seed(rnd_seed)
         import random # Shu add
         random.seed(rnd_seed)
-        import tensorflow as tf
-        tf.set_random_seed(rnd_seed)
         print("seed considered:", rnd_seed)
 
 
