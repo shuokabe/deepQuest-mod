@@ -458,7 +458,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
 
-            dropout_vis_src = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_src)
+            dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
             reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult-mult':
@@ -503,7 +503,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_trg = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
 
-            dropout_vis_trg = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_trg)
+            dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
             reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
@@ -536,7 +536,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature = Dense((params['ENCODER_HIDDEN_SIZE'] * 2), activation='relu', name='reduced_visual_feature')(visual_feature)
 
-            dropout_vis = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
 
             reshape_red_visual_feature = visual_feature_reshape(dropout_vis, params, 'src_trg')
 
@@ -563,7 +563,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature = Dense(params['ENCODER_HIDDEN_SIZE'] * 4, activation='relu', name='reduced_visual_feature')(visual_feature)
 
-            dropout_vis = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
             # concatenation of the visual features with the doc summary
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
@@ -756,7 +756,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
 
-            dropout_vis_src = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_src)
+            dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
             reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult-mult':
@@ -879,7 +879,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_trg = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
 
-            dropout_vis_trg = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_trg)
+            dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
             reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
@@ -913,7 +913,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature = Dense((params['ENCODER_HIDDEN_SIZE'] * 2), activation='relu', name='reduced_visual_feature')(visual_feature)
 
-            dropout_vis = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
 
             reshape_red_visual_feature = visual_feature_reshape(dropout_vis, params, 'src_trg')
 
@@ -974,7 +974,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature = Dense((params['DOC_DECODER_HIDDEN_SIZE'] * 2), activation='relu', name='reduced_visual_feature')(visual_feature)
 
-            dropout_vis = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
             # concatenation of the visual features with the doc summary
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult':
@@ -1638,7 +1638,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
 
-            dropout_vis_src = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_src)
+            dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
             reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult-mult':
@@ -1751,7 +1751,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_below = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_below')(visual_feature)
 
-            dropout_vis_below = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_below)
+            dropout_vis_below = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_below)
             reshape_red_visual_feature_below = visual_feature_reshape(dropout_vis_below, params, 'below')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
@@ -1776,7 +1776,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_above = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_above')(visual_feature)
 
-            dropout_vis_above = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature_above)
+            dropout_vis_above = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_above)
             reshape_red_visual_feature_above = visual_feature_reshape(dropout_vis_above, params, 'above')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
@@ -2113,7 +2113,7 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature = Dense((params['DOC_DECODER_HIDDEN_SIZE'] * 2), activation='relu', name='reduced_visual_feature')(visual_feature)
 
-            dropout_vis = Dropout(0.2, seed=rnd_seed)(reduced_visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
             # concatenation of the visual features with the doc summary
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
                 doc_vis_concat = concatenate([dec_doc_last_state_concat, dropout_vis], name='doc_vis_concat')
