@@ -921,8 +921,8 @@ class TranslationModel(Model_Wrapper):
                 src_annotations_vis = multiply([src_annotations, reshape_red_visual_feature], name='src_annotations_vis')#concatenate([src_annotations, reshape_red_visual_feature], axis=1, name='src_annotations_vis')
                 trg_annotations_vis = multiply([trg_annotations, reshape_red_visual_feature], name='trg_annotations_vis')
             else:
-                src_annotations_vis = concatenate([src_annotations, reshape_red_visual_feature], axis=1, name='src_annotations_vis')
-                trg_annotations_vis = concatenate([trg_annotations, reshape_red_visual_feature], axis=1, name='trg_annotations_vis')
+                src_annotations_vis = concatenate([src_annotations, reshape_red_visual_feature], name='src_annotations_vis')
+                trg_annotations_vis = concatenate([trg_annotations, reshape_red_visual_feature], name='trg_annotations_vis')
             print("src_annotations shape:", K.int_shape(src_annotations_vis))
             annotations = concatenate([src_annotations_vis, trg_annotations_vis], name='anot_seq_concat')
 
