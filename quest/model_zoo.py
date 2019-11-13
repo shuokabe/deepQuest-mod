@@ -756,8 +756,8 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
 
-            dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
-            reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
+            #dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
+            reshape_red_visual_feature_src = visual_feature_reshape(reduced_visual_feature_src, params, 'src') #dropout_vis_src, params, 'src')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult-mult':
                 src_embedding = multiply([src_embedding, reshape_red_visual_feature_src], name='src_embedding_vis')
@@ -879,8 +879,8 @@ class TranslationModel(Model_Wrapper):
 
             reduced_visual_feature_trg = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
 
-            dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
-            reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
+            #dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
+            reshape_red_visual_feature_trg = visual_feature_reshape(reduced_visual_feature_trg, params, 'trg')  #dropout_vis_trg, params, 'trg')
 
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
                 trg_embedding = concatenate([trg_embedding, reshape_red_visual_feature_trg], name='trg_embedding_vis')
