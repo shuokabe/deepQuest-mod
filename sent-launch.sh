@@ -1,4 +1,4 @@
-PARSED_OPTIONS=$(getopt -n "$0"  -o h --long "help,task:,data:,vis:"  -- "$@")
+PARSED_OPTIONS=$(getopt -n "$0"  -o h --long "help,task:,data:,model:,vis:"  -- "$@")
 
 if [ $# -eq 0 ];
 then
@@ -35,6 +35,12 @@ do
       fi
       shift 2;;
 
+    --model)
+      if [ -n "$2" ];
+      then
+        model_name=$2
+      fi
+      shift 2;;
 
     --vis)
       if [ -n "$2" ];
