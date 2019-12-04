@@ -52,6 +52,15 @@ done
 # Data name
 datafile_name=${data_name}.zip
 
+# Pre-trained model for POSTECH only
+
+if [ "${model_name}" = 'POSTECH' ]; then
+  mkdir -p quest/datasets
+  mkdir -p quest/trained_models
+  cp /data/jive/deepQuest/quest/fr-indomain/Dataset_wmt18-en-fr-predictor_enfr.pkl ./quest/datasets
+  cp /data/jive/deepQuest/quest/fr-indomain/epoch_4_weights.h5 ./quest/trained_models
+fi
+
 ### Move data files to the right folder in deepQuest ###
 cd quest
 mkdir -p examples/${task_name}
