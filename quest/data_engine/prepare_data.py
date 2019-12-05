@@ -693,7 +693,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                             required=False,
                             feat_len = params['LEN_VISUAL_FEATURE']) #4096
 
-                if ('bert' in params['MODEL_TYPE'].lower()):
+                if ('EncBertSentVis' in params['MODEL_TYPE']):
                     ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + vis,
                             split,
                             type=data_type_vis,
