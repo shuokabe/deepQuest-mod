@@ -113,3 +113,8 @@ else
     fi
   fi
 fi
+
+if [ "${model_name}" = 'BERT' ]; then
+  cd quest/
+  CUDA_VISIBLE_DEVICES=1 python data_engine/bert_processing.py ../config-sentQEBERTBiRNN.py
+fi

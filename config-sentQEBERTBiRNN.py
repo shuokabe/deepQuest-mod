@@ -173,7 +173,7 @@ def load_parameters():
 
     # Model parameters
     # Perictor+Estimator
-    MODEL_TYPE = 'EncSent'                 # Model to train. See model_zoo() for the supported architectures
+    MODEL_TYPE = 'EncBertSent'                 # Model to train. See model_zoo() for the supported architectures
 
     # only Predictor
     #MODEL_TYPE = 'Predictor'
