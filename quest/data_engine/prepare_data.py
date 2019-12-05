@@ -333,7 +333,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
         ext = params['TRG_LAN']
         target_dict='target_text'
 
-        if ('EncSentVis' in params['MODEL_TYPE']) or ('EncDocVis' in params['MODEL_TYPE']):
+        if ('EncSentVis' in params['MODEL_TYPE']) or ('EncDocVis' in params['MODEL_TYPE']) or ('EncBertSentVis' in params['MODEL_TYPE']):
             vis = params.get('VISUAL_FEATURE', 'vis')
 
         #if params['MODEL_TYPE'] != 'Predictor':
