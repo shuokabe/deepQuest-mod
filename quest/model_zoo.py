@@ -613,7 +613,7 @@ class TranslationModel(Model_Wrapper):
         #                           trainable=self.trainable,
         #                           mask_zero=True)(src_words_tokids)
                                   # mask_zero=True)(src_words)
-        src_embedding1 = Regularize(src_embedding, params, trainable=self.trainable, name='src_state')
+        src_embedding = Regularize(src_embedding, params, trainable=self.trainable, name='src_state')
 
         src_annotations = Bidirectional(eval(params['ENCODER_RNN_TYPE'])(
             params['ENCODER_HIDDEN_SIZE'],
