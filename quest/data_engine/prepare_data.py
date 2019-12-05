@@ -1,5 +1,6 @@
 import logging
 from keras_wrapper.dataset import Dataset, saveDataset, loadDataset
+from data_engine.bert_processing import create_bert_vocab
 
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
@@ -208,7 +209,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                          bpe_codes=params.get('BPE_CODES_PATH', None))
 
 
-        elif params['MODEL_TYPE']=='EstimatorSent' or params['MODEL_TYPE']=='EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE']:
+        elif params['MODEL_TYPE']=='EstimatorSent' or params['MODEL_TYPE']=='EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == "EncBertSent":
 
             ds.setOutput(base_path + '/' + params['TEXT_FILES']['train'] + params['PRED_SCORE'],
                          'train',
@@ -267,7 +268,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                                  max_words=params.get('OUTPUT_VOCABULARY_SIZE', 0),
                                  bpe_codes=params.get('BPE_CODES_PATH', None))
 
-                elif params['MODEL_TYPE'] == 'EstimatorSent' or params['MODEL_TYPE'] == 'EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE']:
+                elif params['MODEL_TYPE'] == 'EstimatorSent' or params['MODEL_TYPE'] == 'EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == "EncBertSent":
 
                     ds.setOutput(base_path + '/' + params['TEXT_FILES'][split] + params['PRED_SCORE'],
                                  split,
@@ -340,14 +341,13 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
 
         for split in ['train', 'val', 'test']:
             if params['TEXT_FILES'].get(split) is not None:
-                if split == 'train':
+                if split == 'train' and 'bert' not in params['MODEL_TYPE']:
                     build_vocabulary = True
                 else:
                     build_vocabulary = False
 
                 # Source language documents
                 if 'PRED_VOCAB' in params:
-
                     ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'],
                             split,
                             type=data_type_src,
@@ -360,6 +360,164 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                             max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
                             min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
                             bpe_codes=params.get('BPE_CODES_PATH', None))
+
+
+                elif "bert" in params['MODEL_TYPE'].lower():# {{{
+                    logging.info('*** BERT *** Setting up input to be use with BERT layer!')
+                    print('*** BERT *** Setting up input to be use with BERT layer!')
+                    print("*** split: {}".format(split))
+
+                    ## SOURCE
+                    # token Ids
+                    if 'PRED_VOCAB' not in params and 'train' in split:
+                        print("'PRED_VOCAB' not in params and 'train' in split:")
+                        ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'] + '.ids',
+                                split,
+                                type=data_type_src,
+                                id=params['INPUTS_IDS_DATASET'][0],
+                                pad_on_batch=params.get('PAD_ON_BATCH', True),
+                                tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                                # build_vocabulary=build_vocabulary,
+                                build_vocabulary={},
+                                fill=params.get('FILL', 'end'),
+                                max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                                max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                                min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                                bpe_codes=params.get('BPE_CODES_PATH', None))
+                        create_bert_vocab(ds, params['INPUTS_IDS_DATASET'][0])
+                    else:
+                        print("BERT: setting inputs, with data_type_src={}".format(data_type_src))
+                        ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'] + '.ids',
+                                split,
+                                type=data_type_src,
+                                id=params['INPUTS_IDS_DATASET'][0],
+                                required=False,
+                                pad_on_batch=params.get('PAD_ON_BATCH', True),
+                                tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                                build_vocabulary='source_text',
+                                fill=params.get('FILL', 'end'),
+                                max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                                max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                                min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                                bpe_codes=params.get('BPE_CODES_PATH', None))
+
+                    # Mask
+                    ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'] + '.mask',
+                            split,
+                            type=data_type_src,
+                            id=params['INPUTS_IDS_DATASET'][1],
+                            required=False,
+                            pad_on_batch=params.get('PAD_ON_BATCH', True),
+                            tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                            # build_vocabulary=build_vocabulary,
+                            build_vocabulary={},
+                            # build_vocabulary='source_text',
+                            fill=params.get('FILL', 'end'),
+                            max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                            max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                            min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                            bpe_codes=params.get('BPE_CODES_PATH', None))
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][1]]['words2idx'] = {u'<unk>': 0, u'0': 0, u'1': 1}
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][1]]['idx2words'] = {0: u'0', 1: u'1'}
+                    ds.vocabulary_len[params['INPUTS_IDS_DATASET'][1]] = 3
+
+                    # SegIds
+                    ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'] + '.segids',
+                            split,
+                            type=data_type_src,
+                            id=params['INPUTS_IDS_DATASET'][2],
+                            required=False,
+                            pad_on_batch=params.get('PAD_ON_BATCH', True),
+                            tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                            # build_vocabulary=build_vocabulary,
+                            build_vocabulary={},
+                            # build_vocabulary='source_text',
+                            fill=params.get('FILL', 'end'),
+                            max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                            max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                            min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                            bpe_codes=params.get('BPE_CODES_PATH', None))
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][2]]['words2idx'] = {u'<unk>': 0, u'0': 0, u'1': 1}
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][2]]['idx2words'] = {0: u'0', 1: u'1'}
+                    ds.vocabulary_len[params['INPUTS_IDS_DATASET'][2]] = 3
+
+                    # SegIds
+
+                    ## TARGET
+                    # token Ids
+                    if 'PRED_VOCAB' not in params and 'train' in split:
+                        print("THIS IS TRAIN!")
+                        ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['TRG_LAN'] + '.ids',
+                                split,
+                                type=data_type_trg,
+                                id=params['INPUTS_IDS_DATASET'][3],
+                                pad_on_batch=params.get('PAD_ON_BATCH', True),
+                                tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                                # build_vocabulary=build_vocabulary,
+                                build_vocabulary={},
+                                fill=params.get('FILL', 'end'),
+                                max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                                max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                                min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                                bpe_codes=params.get('BPE_CODES_PATH', None))
+                        create_bert_vocab(ds, params['INPUTS_IDS_DATASET'][3])
+                    else:
+                        print("THIS IS **NOT** TRAIN!")
+                        ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['TRG_LAN'] + '.ids',
+                                split,
+                                type=data_type_trg,
+                                id=params['INPUTS_IDS_DATASET'][3],
+                                required=False,
+                                pad_on_batch=params.get('PAD_ON_BATCH', True),
+                                tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                                build_vocabulary='source_text',
+                                fill=params.get('FILL', 'end'),
+                                max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                                max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                                min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                                bpe_codes=params.get('BPE_CODES_PATH', None))
+
+                    # Mask
+                    ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['TRG_LAN'] + '.mask',
+                            split,
+                            type=data_type_trg,
+                            id=params['INPUTS_IDS_DATASET'][4],
+                            required=False,
+                            pad_on_batch=params.get('PAD_ON_BATCH', True),
+                            tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                            # build_vocabulary=build_vocabulary,
+                            build_vocabulary={},
+                            # build_vocabulary='source_text',
+                            fill=params.get('FILL', 'end'),
+                            max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                            max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                            min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                            bpe_codes=params.get('BPE_CODES_PATH', None))
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][4]]['words2idx'] = {u'<unk>': 0, u'0': 0, u'1': 1}
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][4]]['idx2words'] = {0: u'0', 1: u'1'}
+                    ds.vocabulary_len[params['INPUTS_IDS_DATASET'][4]] = 3
+
+                    # SegIds
+                    ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['TRG_LAN'] + '.segids',
+                            split,
+                            type=data_type_trg,
+                            id=params['INPUTS_IDS_DATASET'][5],
+                            required=False,
+                            pad_on_batch=params.get('PAD_ON_BATCH', True),
+                            tokenization=params.get('TOKENIZATION_METHOD', 'tokenize_none'),
+                            # build_vocabulary=build_vocabulary,
+                            build_vocabulary={},
+                            # build_vocabulary='source_text',
+                            fill=params.get('FILL', 'end'),
+                            max_text_len=params.get('MAX_SRC_INPUT_TEXT_LEN', 70),
+                            max_words=params.get('INPUT_VOCABULARY_SIZE', 0),
+                            min_occ=params.get('MIN_OCCURRENCES_INPUT_VOCAB', 0),
+                            bpe_codes=params.get('BPE_CODES_PATH', None))
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][5]]['words2idx'] = {u'<unk>': 0, u'0': 0, u'1': 1}
+                    ds.vocabulary[params['INPUTS_IDS_DATASET'][5]]['idx2words'] = {0: u'0', 1: u'1'}
+                    ds.vocabulary_len[params['INPUTS_IDS_DATASET'][5]] = 3
+
+
                 else:
 
                     ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + params['SRC_LAN'],
@@ -376,7 +534,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                             bpe_codes=params.get('BPE_CODES_PATH', None))
 
                 # Target language documents
-                if len(params['INPUTS_IDS_DATASET']) == 2 or ('EncSentVis' in params['MODEL_TYPE']) or ('EncDocVis' in params['MODEL_TYPE']):
+                if (len(params['INPUTS_IDS_DATASET']) == 2 and not "bert" in params['MODEL_TYPE'].lower()) or ('EncSentVis' in params['MODEL_TYPE']) or ('EncDocVis' in params['MODEL_TYPE']):
                     if 'PRED_VOCAB' not in params and 'train' in split:
 
                         ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + ext,
@@ -416,7 +574,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                                     bpe_codes=params.get('BPE_CODES_PATH', None))
 
 
-                if (len(params['INPUTS_IDS_DATASET']) > 2) and ('EncSentVis' not in params['MODEL_TYPE']) and ('EncDocVis' not in params['MODEL_TYPE']):
+                if (len(params['INPUTS_IDS_DATASET']) > 2 and "bert" not in params['MODEL_TYPE'].lower()) and ('EncSentVis' not in params['MODEL_TYPE']) and ('EncDocVis' not in params['MODEL_TYPE']):
                     if 'PRED_VOCAB' not in params and 'train' in split:
 
                         ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + ext,
