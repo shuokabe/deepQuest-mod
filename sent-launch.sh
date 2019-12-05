@@ -105,7 +105,7 @@ else
     cp config-sentQEBiRNN-vis.py ./configs
   else # Baseline sentence-level biRNN model (EncSent)
     if [ "${model_name}" = 'BERT' ]; then
-      cp train-test-sentQEBERTBiRNN.sh ./quest# Baseline EncBertSent (biRNN with BERT)
+      cp train-test-sentQEBERTBiRNN.sh ./quest # Baseline EncBertSent (biRNN with BERT)
     else
       cp train-test-sentQEBiRNN.sh ./quest # Baseline EncSent
     fi
