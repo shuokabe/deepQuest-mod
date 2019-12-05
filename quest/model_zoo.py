@@ -723,7 +723,7 @@ class TranslationModel(Model_Wrapper):
         # visual feature added to the embedding
         if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed':
 
-            reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
+            reduced_visual_feature_src = Dense(768, activation='relu', name='reduced_visual_feature_src')(visual_feature)
 
             dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
             reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
@@ -780,7 +780,7 @@ class TranslationModel(Model_Wrapper):
         # visual feature added to the embedding
         if not params.get('ONE_SIDE', False) and (params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed'):
 
-            reduced_visual_feature_trg = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
+            reduced_visual_feature_trg = Dense(768, activation='relu', name='reduced_visual_feature_trg')(visual_feature)
 
             dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
             reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
@@ -5239,7 +5239,7 @@ def visual_feature_reshape(inputs, params, ext, dim=3):
         print("output:", K.int_shape(output))
     #print("type of output:", type(output)) #'theano.tensor.var.TensorVariable'
 
-    elif (dim == 3): # For the EncSentVis model
+    elif (dim == 3) or (params['MODEL_TYPE'] == 'EncBertSentVis'): # For the EncSentVis model
         max_text_len_dim = params['MAX_INPUT_TEXT_LEN']
 
         a = Lambda(lambda x: K.reshape(x, (1, -1, vis_feature_shape)), output_shape=(-1, vis_feature_shape))(inputs)
