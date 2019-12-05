@@ -91,20 +91,20 @@ cd ../../..
 # POSTECH models
 if [ "${model_name}" = 'POSTECH' ]; then
   if [ "${vis}" = true ]; then # Multimodal document-level QE POSTECH models with visual features (EstimatorDocVis)
-    mv train-test-sentQE${model_name}-vis.sh ./quest
-    mv config-sentQE${model_name}-vis.py ./configs
+    cp train-test-sentQE${model_name}-vis.sh ./quest
+    cp config-sentQE${model_name}-vis.py ./configs
   else # Baseline document-level POSTECH model (EstimatorDoc)
-    mv train-test-sentQE${model_name}.sh ./quest
-    mv config-sentQE${model_name}.py ./configs
+    cp train-test-sentQE${model_name}.sh ./quest
+    cp config-sentQE${model_name}.py ./configs
   fi
 else
 
   # biRNN models
   if [ "${vis}" = true ]; then # Multimodal sentence-level QE biRNN models with visual features (EncSentVis)
-    mv train-test-sentQEBiRNN-vis.sh ./quest
-    mv config-sentQEBiRNN-vis.py ./configs
+    cp train-test-sentQEBiRNN-vis.sh ./quest
+    cp config-sentQEBiRNN-vis.py ./configs
   else # Baseline sentence-level biRNN model (EncSent)
-    mv train-test-sentQEBiRNN.sh ./quest
-    mv config-sentQEBiRNN.py ./configs
+    cp train-test-sentQEBiRNN.sh ./quest
+    cp config-sentQEBiRNN.py ./configs
   fi
 fi
