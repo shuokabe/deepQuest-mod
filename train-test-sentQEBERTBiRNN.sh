@@ -86,7 +86,7 @@ done
 
 
 # we copy the base config
-conf=config-sentQEBiRNN.py
+conf=config-sentQEBERTBiRNN.py
 model_type=EncBertSent
 model_name=${task_name}_${src}${trg}_${model_type}
 store_path=trained_models/${model_name}/
