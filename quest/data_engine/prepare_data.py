@@ -316,7 +316,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
         data_type_trg = 'text'
 
         # handling visual features for the EncSentVis models
-        if 'EncSentVis' in params['MODEL_TYPE']:
+        if 'EncSentVis' in params['MODEL_TYPE'] or ('EncBertSentVis' in params['MODEL_TYPE']):
             data_type_vis = 'image-features'
 
         if 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or 'EstimatorDocVis' in params['MODEL_TYPE']:
