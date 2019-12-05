@@ -97,6 +97,20 @@ if [ "${model_name}" = 'POSTECH' ]; then
     cp train-test-sentQE${model_name}.sh ./quest
     cp config-sentQE${model_name}.py ./configs
   fi
+
+# biRNN-BERT models
+elif [ "${model_name}" = 'BERT' ]; then
+  if [ "${vis}" = true ]; then
+    cp config-sentQEBERTBiRNN-vis.py ./configs
+    cp train-test-sentQEBERTBiRNN-vis.sh ./quest # Baseline EncBertSent (biRNN with BERT)
+  else
+    cp config-sentQEBERTBiRNN.py ./configs
+    cp train-test-sentQEBERTBiRNN.sh ./quest # Baseline EncBertSent (biRNN with BERT)
+  fi
+  # BERT data processing
+  cd quest/
+  CUDA_VISIBLE_DEVICES=1 python data_engine/bert_processing.py ../config-sentQEBERTBiRNN.py
+
 else
 
   # biRNN models
@@ -104,17 +118,7 @@ else
     cp train-test-sentQEBiRNN-vis.sh ./quest
     cp config-sentQEBiRNN-vis.py ./configs
   else # Baseline sentence-level biRNN model (EncSent)
-    if [ "${model_name}" = 'BERT' ]; then
-      cp config-sentQEBERTBiRNN.py ./configs
-      cp train-test-sentQEBERTBiRNN.sh ./quest # Baseline EncBertSent (biRNN with BERT)
-    else
-      cp config-sentQEBiRNN.py ./configs
-      cp train-test-sentQEBiRNN.sh ./quest # Baseline EncSent
-    fi
+    cp config-sentQEBiRNN.py ./configs
+    cp train-test-sentQEBiRNN.sh ./quest # Baseline EncSent
   fi
-fi
-
-if [ "${model_name}" = 'BERT' ]; then
-  cd quest/
-  CUDA_VISIBLE_DEVICES=1 python data_engine/bert_processing.py ../config-sentQEBERTBiRNN.py
 fi
