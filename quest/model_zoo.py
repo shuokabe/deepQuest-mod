@@ -681,6 +681,146 @@ class TranslationModel(Model_Wrapper):
                            outputs=[qe_sent])
 
 
+    def EncBertSentVis(self, params):
+        # visual feature input
+        visual_feature = Input(name=self.ids_inputs[6],
+                            batch_shape=tuple([None, params['LEN_VISUAL_FEATURE']]), dtype='float32')
+        rnd_seed = params.get('RND_SEED', 124)
+
+        src_words_tokids = Input(name=self.ids_inputs[0],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+        src_words_mask = Input(name=self.ids_inputs[1],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+        src_words_segids = Input(name=self.ids_inputs[2],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+        # src_bert_inputs = dict(
+            # input_ids=src_words_tokids, input_mask=src_words_mask, segment_ids=src_words_segids
+        # )
+        src_bert_input = [src_words_tokids, src_words_mask, src_words_segids]
+
+        # src_embedding = BertLayer(
+        #         max_seq_len=params['MAX_INPUT_TEXT_LEN'],
+        #         trainable=False,
+        #         name="src_word_embedding"
+        #         )(src_bert_input)
+
+        bert_layer = BertLayer(
+                max_seq_len=params['MAX_INPUT_TEXT_LEN'],
+                trainable=True,
+                name="bert_embedding"
+                )
+        src_embedding = bert_layer(src_bert_input)
+
+        # src_embedding =  Embedding(params['INPUT_VOCABULARY_SIZE'], params['TARGET_TEXT_EMBEDDING_SIZE'],
+        #                           name='src_word_embedding',
+        #                           embeddings_regularizer=l2(params['WEIGHT_DECAY']),
+        #                           embeddings_initializer=params['INIT_FUNCTION'],
+        #                           trainable=self.trainable,
+        #                           mask_zero=True)(src_words_tokids)
+                                  # mask_zero=True)(src_words)
+        src_embedding = Regularize(src_embedding, params, trainable=self.trainable, name='src_state')
+
+        # visual feature added to the embedding
+        if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed':
+
+            reduced_visual_feature_src = Dense(params['SOURCE_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
+
+            dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
+            reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
+
+            if params.get('VISUAL_FEATURE_METHOD', 'none') == 'mult-mult':
+                src_embedding = multiply([src_embedding, reshape_red_visual_feature_src], name='src_embedding_vis')
+            else:
+                src_embedding = concatenate([src_embedding, reshape_red_visual_feature_src], name='src_embedding_vis')
+            print("src_embedding with visual feature")
+
+        else:
+            pass
+
+        src_annotations = Bidirectional(eval(params['ENCODER_RNN_TYPE'])(
+            params['ENCODER_HIDDEN_SIZE'],
+            kernel_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            recurrent_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            bias_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            dropout=params['RECURRENT_INPUT_DROPOUT_P'],
+            recurrent_dropout=params['RECURRENT_DROPOUT_P'],
+            kernel_initializer=params['INIT_FUNCTION'],
+            recurrent_initializer=params['INNER_INIT'],
+            return_sequences=True,
+            trainable=self.trainable),
+            name='src_bidirectional_encoder_' + params['ENCODER_RNN_TYPE'],
+            merge_mode='concat')(src_embedding)
+
+        trg_words_tokids = Input(name=self.ids_inputs[3],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+        trg_words_mask = Input(name=self.ids_inputs[4],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+        trg_words_segids = Input(name=self.ids_inputs[5],
+                batch_shape=tuple([None, params['MAX_INPUT_TEXT_LEN']]), dtype='int32')
+
+        trg_bert_input = [trg_words_tokids, trg_words_mask, trg_words_segids]
+
+        # trg_embedding = BertLayer(
+        #         max_seq_len=params['MAX_INPUT_TEXT_LEN'],
+        #         trainable=True,
+        #         name="trg_word_embedding"
+        #         )(trg_bert_input)
+
+        trg_embedding = bert_layer(trg_bert_input)
+
+        # trg_embedding = Embedding(params['OUTPUT_VOCABULARY_SIZE'], params['TARGET_TEXT_EMBEDDING_SIZE'],
+        #                           name='target_word_embedding',
+        #                           embeddings_regularizer=l2(params['WEIGHT_DECAY']),
+        #                           embeddings_initializer=params['INIT_FUNCTION'],
+        #                           trainable=self.trainable,
+        #                           mask_zero=True)(trg_words_tokids)
+                                  # mask_zero=True)(trg_words)
+        trg_embedding = Regularize(trg_embedding, params, trainable=self.trainable, name='target_state')
+
+        # visual feature added to the embedding
+        if not params.get('ONE_SIDE', False) and (params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed'):
+
+            reduced_visual_feature_trg = Dense(params['TARGET_TEXT_EMBEDDING_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
+
+            dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
+            reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
+
+            if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
+                trg_embedding = concatenate([trg_embedding, reshape_red_visual_feature_trg], name='trg_embedding_vis')
+            else:
+                trg_embedding = multiply([trg_embedding, reshape_red_visual_feature_trg], name='trg_embedding_vis') #concatenate
+            print("trg_embedding with visual feature")
+
+        else:
+            pass
+
+        trg_annotations = Bidirectional(eval(params['ENCODER_RNN_TYPE'])(
+            params['ENCODER_HIDDEN_SIZE'],
+            kernel_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            recurrent_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            bias_regularizer=l2(params['RECURRENT_WEIGHT_DECAY']),
+            dropout=params['RECURRENT_INPUT_DROPOUT_P'],
+            recurrent_dropout=params['RECURRENT_DROPOUT_P'],
+            kernel_initializer=params['INIT_FUNCTION'],
+            recurrent_initializer=params['INNER_INIT'],
+            return_sequences=True, trainable=self.trainable),
+            name='target_bidirectional_encoder_' + params['ENCODER_RNN_TYPE'],
+            merge_mode='concat')(trg_embedding)
+
+        # annotations = concatenate([src_embedding, trg_embedding], name='anot_seq_concat')
+        annotations = concatenate([src_annotations, trg_annotations], name='anot_seq_concat')
+        # import ipdb; ipdb.set_trace()
+        annotations = NonMasking()(annotations)
+        # apply attention over words at the sentence-level
+        annotations = attention_3d_block(annotations, params, 'sent')
+        out_activation=params.get('OUT_ACTIVATION', 'sigmoid')
+        qe_sent = Dense(1, activation=out_activation, name=self.ids_outputs[0])(annotations)
+
+        self.model = Model(inputs=[src_words_tokids, src_words_mask, src_words_segids, trg_words_tokids, trg_words_mask, trg_words_segids, visual_feature],
+                           outputs=[qe_sent])
+
+
+
 
     #=================================
     # Document-level QE -- BiRNN model

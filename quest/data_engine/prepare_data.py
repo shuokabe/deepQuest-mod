@@ -209,7 +209,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                          bpe_codes=params.get('BPE_CODES_PATH', None))
 
 
-        elif params['MODEL_TYPE']=='EstimatorSent' or params['MODEL_TYPE']=='EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == "EncBertSent":
+        elif params['MODEL_TYPE']=='EstimatorSent' or params['MODEL_TYPE']=='EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == "EncBertSent" or params['MODEL_TYPE'] == "EncBertSentVis":
 
             ds.setOutput(base_path + '/' + params['TEXT_FILES']['train'] + params['PRED_SCORE'],
                          'train',
@@ -268,7 +268,7 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                                  max_words=params.get('OUTPUT_VOCABULARY_SIZE', 0),
                                  bpe_codes=params.get('BPE_CODES_PATH', None))
 
-                elif params['MODEL_TYPE'] == 'EstimatorSent' or params['MODEL_TYPE'] == 'EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == "EncBertSent":
+                elif params['MODEL_TYPE'] == 'EstimatorSent' or params['MODEL_TYPE'] == 'EncSent' or params['MODEL_TYPE']=='EncSentVis' or 'EstimatorDoc' in params['MODEL_TYPE'] or 'EncDoc' in params['MODEL_TYPE'] or 'EncDocVis' in params['MODEL_TYPE'] or params['MODEL_TYPE'] == 'EncBertSent' or params['MODEL_TYPE'] == 'EncBertSentVis':
 
                     ds.setOutput(base_path + '/' + params['TEXT_FILES'][split] + params['PRED_SCORE'],
                                  split,
@@ -692,6 +692,14 @@ def build_dataset(params, vocabulary=dict(), vocabulary_len=dict()):
                             id=params['INPUTS_IDS_DATASET'][4],
                             required=False,
                             feat_len = params['LEN_VISUAL_FEATURE']) #4096
+
+                if ('bert' in params['MODEL_TYPE'].lower()):
+                    ds.setInput(base_path + '/' + params['TEXT_FILES'][split] + vis,
+                            split,
+                            type=data_type_vis,
+                            id=params['INPUTS_IDS_DATASET'][6],
+                            required=False,
+                            feat_len = params['LEN_VISUAL_FEATURE'])
 
                 ### End of added part to handle visual features ###
 
