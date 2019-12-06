@@ -560,12 +560,9 @@ class TranslationModel(Model_Wrapper):
 
         # visual feature concatenated
         if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'last':
-
             reduced_visual_feature = Dense(params['ENCODER_HIDDEN_SIZE'] * 4, activation='relu', name='reduced_visual_feature')(visual_feature)
-
             dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
             # concatenation of the visual features with the doc summary
-
             if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
                 sent_vis_concat = concatenate([annotations, dropout_vis], name='sent_vis_concat') #concatenate #multiply
             else:
@@ -815,6 +812,21 @@ class TranslationModel(Model_Wrapper):
         annotations = attention_3d_block(annotations, params, 'sent')
         out_activation=params.get('OUT_ACTIVATION', 'sigmoid')
         qe_sent = Dense(1, activation=out_activation, name=self.ids_outputs[0])(annotations)
+
+        # visual feature concatenated
+        if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'last':
+            reduced_visual_feature = Dense(params['ENCODER_HIDDEN_SIZE'] * 4, activation='relu', name='reduced_visual_feature')(visual_feature)
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
+            # concatenation of the visual features with the doc summary
+            if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
+                sent_vis_last = concatenate([annotations, dropout_vis], name='sent_vis_last') #concatenate #multiply
+            else:
+                sent_vis_last = multiply([annotations, dropout_vis], name='sent_vis_last') #concatenate #multiply
+
+            qe_sent = Dense(1, activation=out_activation, name=self.ids_outputs[0])(sent_vis_last)
+
+        else:
+            qe_sent = Dense(1, activation=out_activation, name=self.ids_outputs[0])(annotations)
 
         self.model = Model(inputs=[src_words_tokids, src_words_mask, src_words_segids, trg_words_tokids, trg_words_mask, trg_words_segids, visual_feature],
                            outputs=[qe_sent])
