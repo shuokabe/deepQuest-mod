@@ -804,8 +804,27 @@ class TranslationModel(Model_Wrapper):
             name='target_bidirectional_encoder_' + params['ENCODER_RNN_TYPE'],
             merge_mode='concat')(trg_embedding)
 
-        # annotations = concatenate([src_embedding, trg_embedding], name='anot_seq_concat')
-        annotations = concatenate([src_annotations, trg_annotations], name='anot_seq_concat')
+        # visual feature concatenated in the time step
+        if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'annot':
+
+            reduced_visual_feature = Dense((params['ENCODER_HIDDEN_SIZE'] * 2), activation='relu', name='reduced_visual_feature')(visual_feature)
+
+            dropout_vis = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature)
+
+            reshape_red_visual_feature = visual_feature_reshape(dropout_vis, params, 'src_trg')
+
+            if params.get('VISUAL_FEATURE_METHOD', 'none') == 'concat':
+                src_annotations_vis = concatenate([src_annotations, reshape_red_visual_feature], axis=1, name='src_annotations_vis')
+                trg_annotations_vis = concatenate([trg_annotations, reshape_red_visual_feature], axis=1, name='trg_annotations_vis')
+            else:
+                src_annotations_vis = multiply([src_annotations, reshape_red_visual_feature], name='src_annotations_vis')
+                trg_annotations_vis = multiply([trg_annotations, reshape_red_visual_feature], name='trg_annotations_vis')
+            print("src_annotations shape:", K.int_shape(src_annotations_vis))
+            annotations = concatenate([src_annotations_vis, trg_annotations_vis], name='anot_seq_concat')
+
+        else:
+            annotations = concatenate([src_annotations, trg_annotations], name='anot_seq_concat')
+
         # import ipdb; ipdb.set_trace()
         annotations = NonMasking()(annotations)
         # apply attention over words at the sentence-level
