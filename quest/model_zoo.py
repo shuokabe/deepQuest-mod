@@ -720,8 +720,8 @@ class TranslationModel(Model_Wrapper):
         # visual feature added to the embedding
         if params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed':
 
-            reduced_visual_feature_src = Dense(params['INPUT_VOCABULARY_SIZE'], activation='relu', name='reduced_visual_feature_src')(visual_feature)
-
+            reduced_visual_feature_src = Dense(768, activation='relu', name='reduced_visual_feature_src')(visual_feature)
+            #params['INPUT_VOCABULARY_SIZE']
             dropout_vis_src = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_src)
             reshape_red_visual_feature_src = visual_feature_reshape(dropout_vis_src, params, 'src')
 
@@ -777,8 +777,8 @@ class TranslationModel(Model_Wrapper):
         # visual feature added to the embedding
         if not params.get('ONE_SIDE', False) and (params.get('VISUAL_FEATURE_STRATEGY', 'none') == 'embed'):
 
-            reduced_visual_feature_trg = Dense(params['INPUT_VOCABULARY_SIZE'], activation='relu', name='reduced_visual_feature_trg')(visual_feature)
-
+            reduced_visual_feature_trg = Dense(768, activation='relu', name='reduced_visual_feature_trg')(visual_feature)
+            #params['INPUT_VOCABULARY_SIZE']
             dropout_vis_trg = Dropout(0.5, seed=rnd_seed)(reduced_visual_feature_trg)
             reshape_red_visual_feature_trg = visual_feature_reshape(dropout_vis_trg, params, 'trg')
 
