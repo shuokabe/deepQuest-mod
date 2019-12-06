@@ -156,7 +156,7 @@ def load_parameters():
     EPOCH_PER_EST_WORD = 10
     #BATCH_SIZE = 2                               # Size of each minibatch
     #to use on real data
-    BATCH_SIZE = 40 #50
+    BATCH_SIZE = 50
 
     HOMOGENEOUS_BATCHES = False                   # Use batches with homogeneous output lengths (Dangerous!!)
     JOINT_BATCHES = 4                             # When using homogeneous batches, get this number of batches to sort
