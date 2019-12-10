@@ -1,6 +1,6 @@
 import logging
 from keras_wrapper.dataset import Dataset, saveDataset, loadDataset
-#from data_engine.bert_processing import create_bert_vocab
+from data_engine.bert_processing import create_bert_vocab
 
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
